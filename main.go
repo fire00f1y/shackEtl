@@ -72,6 +72,7 @@ func main() {
 		fmt.Printf("Error while opening postgres db with creds [%s]: %v\n", dbinfo, err)
 		os.Exit(2)
 	}
+	start := time.Now()
 	defer db.Close()
 
 	fmt.Println("# Starting indexing")
@@ -83,6 +84,7 @@ func main() {
 	limit := 1000
 	whereId := -1
 	for found {
+		roundStart := time.Now()
 		found = false
 		rows, err := db.Query(fmt.Sprintf("SELECT first.*, second.author as parent_author FROM post as first left join post as second on first.parent_id = second.id and first.id != second.id where first.id > %d order by first.id asc limit %d;", whereId, limit))
 		offset += 1
@@ -108,8 +110,8 @@ func main() {
 			count += 1
 			whereId = post.Id
 		}
-		fmt.Printf("Index count: %d, next id: %d\n", offset*limit, whereId)
+		fmt.Printf("Index count: %d, next id: %d. Took %s\n", offset*limit, whereId, time.Since(roundStart).String())
 		failed += postPosts(posts, true)
 	}
-	fmt.Printf("updated %d posts, %d updates failed\n", count, failed)
+	fmt.Printf("updated %d posts, %d updates failed. Entire ETL took %s\n", count, failed, time.Since(start).String())
 }

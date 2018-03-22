@@ -15,9 +15,9 @@ import (
 const (
 	DB_HOST          = "localhost"
 	DB_PORT          = "5432"
-	DB_USER          = "fire00f1y"
-	DB_PASSWORD      = "hampton1!"
-	DB_NAME          = "chatty"
+	DB_USER          = "postgres"
+	DB_PASSWORD      = "postgres"
+	DB_NAME          = "REPLACE THIS WITH THE DATABASE NAME"
 	UNSTRUCTURED_URL = "http://localhost:8983/solr/unstructured_posts/update"
 )
 

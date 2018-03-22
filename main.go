@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"database/sql"
 	"encoding/json"
-	"os"
-	"bytes"
-	"time"
+	"fmt"
+	_ "github.com/lib/pq"
 	"io/ioutil"
 	"net/http"
-	_ "github.com/lib/pq"
+	"os"
+	"time"
 )
 
 const (
@@ -22,16 +22,16 @@ const (
 )
 
 type Post struct {
-	Id               int    `json:"id"`
-	Thread_Id        string `json:"threadId"`
-	Parent_Thread_Id string `json:"parentThreadId"`
-	Parent_Author    string `json:"parentAuthor"`
-	Author           string `json:"author"`
-	Category         string `json:"category"`
-	Date             string `json:"postDate"`
-	Body             string `json:"body_md"`
-	Author_c         string `json:"author_normalized"`
-	Body_c           string `json:"body_normalized"`
+	Id             int    `json:"id"`
+	ThreadId       string `json:"threadId"`
+	ParentThreadId string `json:"parentThreadId"`
+	ParentAuthor   string `json:"parentAuthor"`
+	Author         string `json:"author"`
+	Category       string `json:"category"`
+	Date           string `json:"postDate"`
+	Body           string `json:"body_md"`
+	AuthorC        string `json:"author_normalized"`
+	BodyC          string `json:"body_normalized"`
 }
 
 func postPosts(posts []Post, recurse bool) int {
@@ -96,13 +96,14 @@ func main() {
 		for rows.Next() {
 			found = true
 			var post Post
-			err = rows.Scan(&post.Id, &post.Thread_Id, &post.Parent_Thread_Id, &post.Author, &post.Category, &post.Date, &post.Body, &post.Author_c, &post.Body_c, &post.Parent_Author)
+			err = rows.Scan(&post.Id, &post.ThreadId, &post.ParentThreadId, &post.Author, &post.Category, &post.Date, &post.Body, &post.AuthorC, &post.BodyC, &post.ParentAuthor)
 			if err != nil {
 				fmt.Printf("Error scanning row for post[%d]: %v\n", post.Id, err)
-				failed += 1
-				continue
+				if post.Id == 0 && post.ThreadId == "" {
+					failed += 1
+					continue
+				}
 			}
-			// fmt.Printf("%#v\n", post)
 			posts = append(posts, post)
 			count += 1
 			whereId = post.Id
